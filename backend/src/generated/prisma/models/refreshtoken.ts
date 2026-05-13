@@ -206,7 +206,7 @@ export type refreshtokenWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"refreshtoken"> | Date | string
   expiresAt?: Prisma.DateTimeFilter<"refreshtoken"> | Date | string
   revoked?: Prisma.BoolFilter<"refreshtoken"> | boolean
-  user?: Prisma.XOR<Prisma.UsersScalarRelationFilter, Prisma.usersWhereInput>
+  user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.userWhereInput>
 }
 
 export type refreshtokenOrderByWithRelationInput = {
@@ -218,7 +218,7 @@ export type refreshtokenOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
   revoked?: Prisma.SortOrder
-  user?: Prisma.usersOrderByWithRelationInput
+  user?: Prisma.userOrderByWithRelationInput
 }
 
 export type refreshtokenWhereUniqueInput = Prisma.AtLeast<{
@@ -233,7 +233,7 @@ export type refreshtokenWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"refreshtoken"> | Date | string
   expiresAt?: Prisma.DateTimeFilter<"refreshtoken"> | Date | string
   revoked?: Prisma.BoolFilter<"refreshtoken"> | boolean
-  user?: Prisma.XOR<Prisma.UsersScalarRelationFilter, Prisma.usersWhereInput>
+  user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.userWhereInput>
 }, "id">
 
 export type refreshtokenOrderByWithAggregationInput = {
@@ -272,7 +272,7 @@ export type refreshtokenCreateInput = {
   createdAt?: Date | string
   expiresAt: Date | string
   revoked?: boolean
-  user: Prisma.usersCreateNestedOneWithoutRefreshtokensInput
+  user: Prisma.userCreateNestedOneWithoutRefreshtokensInput
 }
 
 export type refreshtokenUncheckedCreateInput = {
@@ -294,7 +294,7 @@ export type refreshtokenUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   revoked?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  user?: Prisma.usersUpdateOneRequiredWithoutRefreshtokensNestedInput
+  user?: Prisma.userUpdateOneRequiredWithoutRefreshtokensNestedInput
 }
 
 export type refreshtokenUncheckedUpdateInput = {
@@ -540,7 +540,7 @@ export type refreshtokenSelect<ExtArgs extends runtime.Types.Extensions.Internal
   createdAt?: boolean
   expiresAt?: boolean
   revoked?: boolean
-  user?: boolean | Prisma.usersDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.userDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["refreshtoken"]>
 
 export type refreshtokenSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -552,7 +552,7 @@ export type refreshtokenSelectCreateManyAndReturn<ExtArgs extends runtime.Types.
   createdAt?: boolean
   expiresAt?: boolean
   revoked?: boolean
-  user?: boolean | Prisma.usersDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.userDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["refreshtoken"]>
 
 export type refreshtokenSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -564,7 +564,7 @@ export type refreshtokenSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.
   createdAt?: boolean
   expiresAt?: boolean
   revoked?: boolean
-  user?: boolean | Prisma.usersDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.userDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["refreshtoken"]>
 
 export type refreshtokenSelectScalar = {
@@ -580,19 +580,19 @@ export type refreshtokenSelectScalar = {
 
 export type refreshtokenOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "token" | "user_id" | "ip" | "device" | "createdAt" | "expiresAt" | "revoked", ExtArgs["result"]["refreshtoken"]>
 export type refreshtokenInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  user?: boolean | Prisma.usersDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.userDefaultArgs<ExtArgs>
 }
 export type refreshtokenIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  user?: boolean | Prisma.usersDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.userDefaultArgs<ExtArgs>
 }
 export type refreshtokenIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  user?: boolean | Prisma.usersDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.userDefaultArgs<ExtArgs>
 }
 
 export type $refreshtokenPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "refreshtoken"
   objects: {
-    user: Prisma.$usersPayload<ExtArgs>
+    user: Prisma.$userPayload<ExtArgs>
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -997,7 +997,7 @@ readonly fields: refreshtokenFieldRefs;
  */
 export interface Prisma__refreshtokenClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  user<T extends Prisma.usersDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.usersDefaultArgs<ExtArgs>>): Prisma.Prisma__usersClient<runtime.Types.Result.GetResult<Prisma.$usersPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  user<T extends Prisma.userDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.userDefaultArgs<ExtArgs>>): Prisma.Prisma__userClient<runtime.Types.Result.GetResult<Prisma.$userPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
