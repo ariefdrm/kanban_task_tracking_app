@@ -7,4 +7,10 @@ export class AppService {
       message: "Hello, World!"
     };
   }
+
+  getName() {
+    return {
+      message: "hello, name"
+    }
+  }
 }
