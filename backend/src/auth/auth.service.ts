@@ -1,0 +1,129 @@
+import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { RegisterDTO } from './dto/register.dto';
+import { LoginDTO } from './dto/login.dto';
+import { JwtService } from '@nestjs/jwt';
+import 'dotenv/config'
+import bcrypt from 'bcryptjs';
+import { PrismaService } from '../prisma/prisma.service';
+
+@Injectable()
+export class AuthService {
+  constructor(
+    private prisma: PrismaService,
+    private jwtSerivce: JwtService
+  ) { }
+
+  async register(dto: RegisterDTO, userAgent: string, ip: string) {
+
+    const hashedPassword = await bcrypt.hash(
+      dto.password,
+      Number(process.env['SALT_ROUND'])
+    );
+
+    try {
+
+      const user = await this.prisma.user.create({
+        data: {
+          name: dto.name,
+          email: dto.email,
+          password: hashedPassword,
+        },
+      });
+
+      const tokens = await this.generateTokens(
+        user.id,
+        user.email,
+        user.name,
+        userAgent,
+        ip
+      );
+
+      return {
+        data: {
+          user: {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            tokens: { ...tokens },
+          },
+        },
+      };
+
+    } catch (error) {
+      throw new ConflictException(
+        'Duplicate data detected'
+      );
+    }
+  }
+
+  async login(dto: LoginDTO, userAgent: string, ip: string) {
+    const user = await this.prisma.user.findUnique({ where: { email: dto.email } })
+    if (!user) throw new ConflictException("Email Not Found")
+
+    const valid = await bcrypt.compare(dto.password as string, user.password)
+    if (!valid) throw new UnauthorizedException("Invalid Credentials")
+
+    const tokens = await this.generateTokens(
+      user.id,
+      user.email,
+      user.name,
+      userAgent,
+      ip
+    );
+
+    return {
+      ...tokens
+    }
+  }
+
+  async refresh(refreshToken: string, userAgent: string, ip: string) {
+    const stored = await this.prisma.refreshToken.findUnique({ where: { token: refreshToken } })
+
+    if (!stored || stored.expiresAt < new Date()) {
+      throw new UnauthorizedException("Invalid or expired refresh token")
+    }
+
+    await this.prisma.refreshToken.delete({ where: { token: refreshToken } })
+    const user = await this.prisma.user.findUnique({ where: { id: stored.user_id } })
+
+
+    return this.generateTokens(String(user?.id), String(user?.email), String(user?.name), userAgent, ip)
+  }
+
+  async logout(refreshToken: string) {
+    await this.prisma.refreshToken.deleteMany({ where: { token: refreshToken } });
+    return { message: 'Logged out successfully' };
+  }
+
+  private async generateTokens(userId: string, email: string, userName: string | null, userAgent: string, ip: string) {
+    const payload = { sub: userId, email, userName };
+
+    const accessToken = this.jwtSerivce.sign(payload, {
+      secret: process.env.JWT_SECRET || 'secret',
+    });
+
+    const refreshToken = this.jwtSerivce.sign(payload, {
+      secret: process.env.JWT_SECRET || 'refresh-secret',
+    });
+
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 7);
+
+    await this.prisma.refreshToken.create({
+      data: {
+        token: refreshToken,
+        device: userAgent,
+        ip,
+        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        user: {
+          connect: {
+            id: userId,
+          },
+        },
+      },
+    });
+
+    return { accessToken, refreshToken };
+  }
+
+}

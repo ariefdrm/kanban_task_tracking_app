@@ -51,8 +51,8 @@ export const AnyNull = runtime.AnyNull
 
 
 export const ModelName = {
-  user: 'user',
-  refreshtoken: 'refreshtoken',
+  User: 'User',
+  RefreshToken: 'RefreshToken',
   Task: 'Task',
   Notification: 'Notification'
 } as const
@@ -85,7 +85,7 @@ export const UserScalarFieldEnum = {
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
 
 
-export const RefreshtokenScalarFieldEnum = {
+export const RefreshTokenScalarFieldEnum = {
   id: 'id',
   token: 'token',
   user_id: 'user_id',
@@ -96,7 +96,7 @@ export const RefreshtokenScalarFieldEnum = {
   revoked: 'revoked'
 } as const
 
-export type RefreshtokenScalarFieldEnum = (typeof RefreshtokenScalarFieldEnum)[keyof typeof RefreshtokenScalarFieldEnum]
+export type RefreshTokenScalarFieldEnum = (typeof RefreshTokenScalarFieldEnum)[keyof typeof RefreshTokenScalarFieldEnum]
 
 
 export const TaskScalarFieldEnum = {
