@@ -1,8 +1,8 @@
-import { Controller, Post, Body, HttpCode, HttpStatus, Ip, Headers, Res } from '@nestjs/common';
+import { Controller, Post, Body, HttpCode, HttpStatus, Ip, Headers, Res, Get, Req, UnauthorizedException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDTO } from './dto/login.dto';
 import { RegisterDTO } from './dto/register.dto';
-import type { Response } from 'express';
+import type { Request, Response } from 'express';
 import { RefreshDto } from './dto/refresh.dto';
 
 @Controller('auth')
@@ -25,19 +25,19 @@ export class AuthController {
   @Post('login')
   @HttpCode(HttpStatus.OK)
   async login(
-    @Res() res: Response,
+    @Res({ passthrough: true }) res: Response,
     @Body() dto: LoginDTO,
     @Ip() ip: string,
     @Headers('user-agent') userAgent: string
   ) {
     const { refreshToken, accessToken } = await this.authService.login(dto, userAgent, ip)
 
-    res.cookie('access token', accessToken, {
+    res.cookie('access_token', accessToken, {
       httpOnly: true,
       sameSite: 'lax',
     })
 
-    res.cookie('refresh token', refreshToken, {
+    res.cookie('refresh_token', refreshToken, {
       httpOnly: true,
       sameSite: 'lax',
     })
@@ -52,17 +52,41 @@ export class AuthController {
 
   @Post('refresh')
   @HttpCode(HttpStatus.ACCEPTED)
-  refresh(
-    @Body() dto: RefreshDto,
+  async refresh(
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
     @Ip() ip: string,
     @Headers('user-agent') userAgent: string
   ) {
-    return this.authService.refresh(dto.refreshToken, userAgent, ip);
+    const getRefreshToken = req.cookies.refresh_token
+
+    if (!getRefreshToken) throw new UnauthorizedException('Refresh token missing')
+
+    const { refreshToken, accessToken } = await this.authService.refresh(getRefreshToken, userAgent, ip);
+
+    res.cookie('access_token', accessToken, {
+      httpOnly: true,
+      sameSite: 'lax',
+    })
+
+    res.cookie('refresh_token', refreshToken, {
+      httpOnly: true,
+      sameSite: 'lax',
+    })
+
+    return {
+      data: {
+        accessToken,
+        refreshToken
+      }
+    }
   }
 
   @Post('logout')
   @HttpCode(HttpStatus.OK)
-  logout(@Body() dto: RefreshDto) {
-    return this.authService.logout(dto.refreshToken);
+  logout(@Req() req: Request) {
+    const getRefreshToken = req.cookies.refresh_token
+
+    return this.authService.logout(getRefreshToken);
   }
 }

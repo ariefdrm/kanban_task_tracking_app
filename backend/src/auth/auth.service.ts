@@ -2,9 +2,9 @@ import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/co
 import { RegisterDTO } from './dto/register.dto';
 import { LoginDTO } from './dto/login.dto';
 import { JwtService } from '@nestjs/jwt';
-import 'dotenv/config'
-import bcrypt from 'bcryptjs';
 import { PrismaService } from '../prisma/prisma.service';
+import bcrypt from 'bcryptjs';
+import 'dotenv/config'
 
 @Injectable()
 export class AuthService {
@@ -78,14 +78,10 @@ export class AuthService {
 
   async refresh(refreshToken: string, userAgent: string, ip: string) {
     const stored = await this.prisma.refreshToken.findUnique({ where: { token: refreshToken } })
-
-    if (!stored || stored.expiresAt < new Date()) {
-      throw new UnauthorizedException("Invalid or expired refresh token")
-    }
+    if (!stored || stored.expiresAt < new Date()) throw new UnauthorizedException("Invalid or expired refresh token")
 
     await this.prisma.refreshToken.delete({ where: { token: refreshToken } })
     const user = await this.prisma.user.findUnique({ where: { id: stored.user_id } })
-
 
     return this.generateTokens(String(user?.id), String(user?.email), String(user?.name), userAgent, ip)
   }
