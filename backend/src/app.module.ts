@@ -5,9 +5,10 @@ import { AuthModule } from './auth/auth.module';
 import { PassportModule } from '@nestjs/passport/dist/passport.module';
 import { JwtModule } from '@nestjs/jwt';
 import { PrismaModule } from './prisma/prisma.module';
+import { TaskModule } from './task/task.module';
 
 @Module({
-  imports: [AuthModule, PassportModule, PrismaModule, JwtModule],
+  imports: [AuthModule, PassportModule, PrismaModule, JwtModule, TaskModule],
   controllers: [AppController],
   providers: [AppService],
 })

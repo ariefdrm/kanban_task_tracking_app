@@ -5,6 +5,7 @@ import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service';
 import bcrypt from 'bcryptjs';
 import 'dotenv/config'
+import { jwtContants } from './contants';
 
 @Injectable()
 export class AuthService {
@@ -91,15 +92,41 @@ export class AuthService {
     return { message: 'Logged out successfully' };
   }
 
+  async me(accessToken: string) {
+    try {
+      const payload = await this.jwtSerivce.verifyAsync(accessToken, {
+        secret: jwtContants.secret,
+      });
+
+      const user = await this.prisma.user.findUnique({
+        where: {
+          id: payload.sub,
+        },
+        select: {
+          id: true,
+          email: true,
+          name: true,
+        },
+      });
+
+      if (!user) {
+        throw new UnauthorizedException('User not found');
+      }
+
+      return user;
+    } catch {
+      throw new UnauthorizedException('Invalid or expired access token');
+    }
+  }
   private async generateTokens(userId: string, email: string, userName: string | null, userAgent: string, ip: string) {
     const payload = { sub: userId, email, userName };
 
     const accessToken = this.jwtSerivce.sign(payload, {
-      secret: process.env.JWT_SECRET || 'secret',
+      secret: jwtContants.secret || 'secret',
     });
 
     const refreshToken = this.jwtSerivce.sign(payload, {
-      secret: process.env.JWT_SECRET || 'refresh-secret',
+      secret: jwtContants.secret || 'refresh-secret',
     });
 
     const expiresAt = new Date();

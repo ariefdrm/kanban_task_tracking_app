@@ -4,6 +4,7 @@ import { LoginDTO } from './dto/login.dto';
 import { RegisterDTO } from './dto/register.dto';
 import type { Request, Response } from 'express';
 import { RefreshDto } from './dto/refresh.dto';
+import { Cookie } from './decorator/cookie.decorator';
 
 @Controller('auth')
 export class AuthController {
@@ -53,13 +54,11 @@ export class AuthController {
   @Post('refresh')
   @HttpCode(HttpStatus.ACCEPTED)
   async refresh(
-    @Req() req: Request,
+    @Cookie('refresh_token') getRefreshToken: string,
     @Res({ passthrough: true }) res: Response,
     @Ip() ip: string,
     @Headers('user-agent') userAgent: string
   ) {
-    const getRefreshToken = req.cookies.refresh_token
-
     if (!getRefreshToken) throw new UnauthorizedException('Refresh token missing')
 
     const { refreshToken, accessToken } = await this.authService.refresh(getRefreshToken, userAgent, ip);
@@ -84,9 +83,15 @@ export class AuthController {
 
   @Post('logout')
   @HttpCode(HttpStatus.OK)
-  logout(@Req() req: Request) {
-    const getRefreshToken = req.cookies.refresh_token
+  logout(@Cookie('refresh_token') refreshToken: string) {
 
-    return this.authService.logout(getRefreshToken);
+    return this.authService.logout(refreshToken);
+  }
+
+  @Get('me')
+  me(
+    @Cookie('access_token') accessToken: string
+  ) {
+    return this.authService.me(accessToken)
   }
 }
