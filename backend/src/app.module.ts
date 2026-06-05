@@ -8,9 +8,10 @@ import { PrismaModule } from './prisma/prisma.module';
 import { TaskModule } from './task/task.module';
 import { UsersModule } from './users/users.module';
 import { BoardsModule } from './boards/boards.module';
+import { ColumnsModule } from './columns/columns.module';
 
 @Module({
-  imports: [AuthModule, PassportModule, PrismaModule, JwtModule, UsersModule, BoardsModule, TaskModule],
+  imports: [AuthModule, PassportModule, PrismaModule, JwtModule, UsersModule, BoardsModule, ColumnsModule, TaskModule],
   controllers: [AppController],
   providers: [AppService],
 })
