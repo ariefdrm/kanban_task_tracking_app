@@ -10,13 +10,32 @@ export default defineNuxtConfig({
     '@nuxt/image',
     '@nuxt/eslint',
     '@morev/vue-transitions',
-    '@pinia/nuxt'
+    '@pinia/nuxt',
   ],
+
+  css: ['~/assets/css/main.css'],
+
+  app: {
+    head: {
+      title: 'TaskFlow — Visual task tracking',
+      meta: [
+        { charset: 'utf-8' },
+        { name: 'viewport', content: 'width=device-width, initial-scale=1' },
+        { name: 'description', content: 'Personal task tracking with a clean, focused Kanban workflow.' },
+      ],
+      htmlAttrs: { lang: 'en' },
+      script: [
+        {
+          innerHTML: `(()=>{try{const t=localStorage.getItem('tf:theme');const d=t==='dark'||(t!=='light'&&matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.classList.toggle('dark',d)}catch(e){}})();`,
+          tagPosition: 'head',
+        },
+      ],
+    },
+  },
+
   runtimeConfig: {
     public: {
-      apiBase: 'http://localhost:8000'
-    }
-  }
-
-
+      apiBase: 'http://localhost:8000',
+    },
+  },
 })
