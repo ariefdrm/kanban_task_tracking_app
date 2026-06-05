@@ -9,9 +9,10 @@ import { TaskModule } from './task/task.module';
 import { UsersModule } from './users/users.module';
 import { BoardsModule } from './boards/boards.module';
 import { ColumnsModule } from './columns/columns.module';
+import { ActivitiesModule } from './activities/activities.module';
 
 @Module({
-  imports: [AuthModule, PassportModule, PrismaModule, JwtModule, UsersModule, BoardsModule, ColumnsModule, TaskModule],
+  imports: [AuthModule, PassportModule, PrismaModule, JwtModule, UsersModule, BoardsModule, ColumnsModule, ActivitiesModule, TaskModule],
   controllers: [AppController],
   providers: [AppService],
 })
