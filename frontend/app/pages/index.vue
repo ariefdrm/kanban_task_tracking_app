@@ -1,5 +1,17 @@
+<script setup lang="ts">
+definePageMeta({ layout: 'public' })
+
+useHead({
+  title: 'TaskFlow — Visual task tracking for focused work',
+})
+</script>
+
 <template>
   <div>
-    <h1>Hello, vue</h1>
+    <HeroSection />
+    <FeaturesSection />
+    <WorkflowSection />
+    <BenefitsSection />
+    <CTASection />
   </div>
 </template>
