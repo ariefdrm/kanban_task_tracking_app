@@ -1,11 +1,6 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
   moduleFormat = "cjs"
 }
 
@@ -13,11 +8,7 @@ datasource db {
   provider = "postgresql"
 }
 
-enum TaskStatus {
-  TODO
-  IN_PROGRESS
-  DONE
-}
+// ─── Enums ────────────────────────────────────────────────────────────────────
 
 enum TaskPriority {
   LOW
@@ -25,80 +16,120 @@ enum TaskPriority {
   HIGH
 }
 
-enum NotificationType {
-  DEADLINE_REMINDER
-  TASK_UPDATED
+// Marks a column's semantic role — used for analytics (completion rate, trend)
+// without depending on column names.
+enum ColumnType {
+  TODO
+  IN_PROGRESS
+  DONE
 }
 
+enum ActivityAction {
+  TASK_CREATED
+  TASK_UPDATED
+  TASK_MOVED
+  TASK_DELETED
+  TASK_REORDERED
+}
+
+// ─── Models ───────────────────────────────────────────────────────────────────
+
 model User {
-  id            String         @id @default(uuid()) @db.Uuid
-  email         String         @unique
-  password      String
-  name          String? @unique
-  refreshtokens RefreshToken[]
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime?
-  tasks         Task[]
-  notifications Notification[]
+  id        String   @id @default(uuid()) @db.Uuid
+  email     String   @unique
+  password  String
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  refreshTokens RefreshToken[]
+  boards        Board[]
 
   @@map("users")
 }
 
 model RefreshToken {
   id        String   @id @default(uuid()) @db.Uuid
-  token     String @unique
-  user_id   String   @db.Uuid
-  user      User     @relation(fields: [user_id], references: [id])
+  token     String   @unique
+  userId    String   @db.Uuid
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   ip        String
   device    String
   createdAt DateTime @default(now())
   expiresAt DateTime
   revoked   Boolean  @default(false)
 
-  @@index([user_id])
+  @@index([userId])
   @@index([expiresAt])
   @@map("refresh_tokens")
 }
 
-model Task {
-  id          String  @id @default(uuid()) @db.Uuid
-  title       String
-  description String?
-
-  status   TaskStatus   @default(TODO)
-  priority TaskPriority @default(MEDIUM)
-
-  deadline DateTime
-
+model Board {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   userId String @db.Uuid
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  notifications Notification[]
+  columns    Column[]
+  activities Activity[]
 
   @@index([userId])
-  @@index([deadline])
-  @@index([status])
+  @@map("boards")
+}
+
+model Column {
+  id       String     @id @default(uuid()) @db.Uuid
+  name     String
+  position Int
+  type     ColumnType @default(TODO)
+
+  boardId String @db.Uuid
+  board   Board  @relation(fields: [boardId], references: [id], onDelete: Cascade)
+
+  tasks Task[]
+
+  @@index([boardId])
+  @@map("columns")
+}
+
+model Task {
+  id          String       @id @default(uuid()) @db.Uuid
+  title       String
+  description String?
+  priority    TaskPriority @default(MEDIUM)
+  position    Int
+  dueDate     DateTime?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  columnId String @db.Uuid
+  column   Column @relation(fields: [columnId], references: [id], onDelete: Cascade)
+
+  activities Activity[]
+
+  @@index([columnId])
+  @@index([dueDate])
   @@map("tasks")
 }
 
-model Notification {
-  id      String           @id @default(uuid()) @db.Uuid
-  message String
-  type    NotificationType
-  isRead  Boolean          @default(false)
+// Stores metadata as JSON to support flexible payloads per action type.
+// e.g. TASK_MOVED → { fromColumnId, toColumnId, fromPosition, toPosition }
+model Activity {
+  id        String         @id @default(uuid()) @db.Uuid
+  action    ActivityAction
+  metadata  Json?
+  createdAt DateTime       @default(now())
 
-  createdAt DateTime @default(now())
-
-  userId String @db.Uuid
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  boardId String @db.Uuid
+  board   Board  @relation(fields: [boardId], references: [id], onDelete: Cascade)
 
   taskId String? @db.Uuid
   task   Task?   @relation(fields: [taskId], references: [id], onDelete: SetNull)
 
-  @@index([userId])
+  @@index([boardId])
   @@index([taskId])
-  @@map("notifications")
+  @@map("activities")
 }
