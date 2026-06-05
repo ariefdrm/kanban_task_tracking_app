@@ -10,9 +10,10 @@ import { UsersModule } from './users/users.module';
 import { BoardsModule } from './boards/boards.module';
 import { ColumnsModule } from './columns/columns.module';
 import { ActivitiesModule } from './activities/activities.module';
+import { AnalyticsModule } from './analytics/analytics.module';
 
 @Module({
-  imports: [AuthModule, PassportModule, PrismaModule, JwtModule, UsersModule, BoardsModule, ColumnsModule, ActivitiesModule, TaskModule],
+  imports: [AuthModule, PassportModule, PrismaModule, JwtModule, UsersModule, BoardsModule, ColumnsModule, ActivitiesModule, TaskModule, AnalyticsModule],
   controllers: [AppController],
   providers: [AppService],
 })
