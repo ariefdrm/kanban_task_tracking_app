@@ -9,15 +9,6 @@
 * 🟢 You can import this file directly.
 */
 
-export const TaskStatus = {
-  TODO: 'TODO',
-  IN_PROGRESS: 'IN_PROGRESS',
-  DONE: 'DONE'
-} as const
-
-export type TaskStatus = (typeof TaskStatus)[keyof typeof TaskStatus]
-
-
 export const TaskPriority = {
   LOW: 'LOW',
   MEDIUM: 'MEDIUM',
@@ -27,9 +18,21 @@ export const TaskPriority = {
 export type TaskPriority = (typeof TaskPriority)[keyof typeof TaskPriority]
 
 
-export const NotificationType = {
-  DEADLINE_REMINDER: 'DEADLINE_REMINDER',
-  TASK_UPDATED: 'TASK_UPDATED'
+export const ColumnType = {
+  TODO: 'TODO',
+  IN_PROGRESS: 'IN_PROGRESS',
+  DONE: 'DONE'
 } as const
 
-export type NotificationType = (typeof NotificationType)[keyof typeof NotificationType]
+export type ColumnType = (typeof ColumnType)[keyof typeof ColumnType]
+
+
+export const ActivityAction = {
+  TASK_CREATED: 'TASK_CREATED',
+  TASK_UPDATED: 'TASK_UPDATED',
+  TASK_MOVED: 'TASK_MOVED',
+  TASK_DELETED: 'TASK_DELETED',
+  TASK_REORDERED: 'TASK_REORDERED'
+} as const
+
+export type ActivityAction = (typeof ActivityAction)[keyof typeof ActivityAction]

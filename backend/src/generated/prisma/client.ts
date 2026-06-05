@@ -50,12 +50,22 @@ export type User = Prisma.UserModel
  */
 export type RefreshToken = Prisma.RefreshTokenModel
 /**
+ * Model Board
+ * 
+ */
+export type Board = Prisma.BoardModel
+/**
+ * Model Column
+ * 
+ */
+export type Column = Prisma.ColumnModel
+/**
  * Model Task
  * 
  */
 export type Task = Prisma.TaskModel
 /**
- * Model Notification
+ * Model Activity
  * 
  */
-export type Notification = Prisma.NotificationModel
+export type Activity = Prisma.ActivityModel
