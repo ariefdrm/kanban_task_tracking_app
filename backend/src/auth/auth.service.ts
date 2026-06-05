@@ -82,7 +82,7 @@ export class AuthService {
     if (!stored || stored.expiresAt < new Date()) throw new UnauthorizedException("Invalid or expired refresh token")
 
     await this.prisma.refreshToken.delete({ where: { token: refreshToken } })
-    const user = await this.prisma.user.findUnique({ where: { id: stored.user_id } })
+    const user = await this.prisma.user.findUnique({ where: { id: stored.userId } })
 
     return this.generateTokens(String(user?.id), String(user?.email), String(user?.name), userAgent, ip)
   }
@@ -126,12 +126,13 @@ export class AuthService {
       expiresIn: jwtContants.accessTokenTtl,
     });
 
+
     const refreshToken = this.jwtSerivce.sign(payload, {
       secret: jwtContants.secret,
-      expiresIn: `${jwtContants.refreshTokenTtlDays}d`,
+      expiresIn: jwtContants.refreshTokenTtl,
     });
 
-    const expiresAt = new Date(Date.now() + jwtContants.refreshTokenTtlDays * 24 * 60 * 60 * 1000);
+    const expiresAt = new Date(Date.now() + jwtContants.refreshTokenTtlMs);
 
     await this.prisma.refreshToken.create({
       data: {
