@@ -7,9 +7,10 @@ import { JwtModule } from '@nestjs/jwt';
 import { PrismaModule } from './prisma/prisma.module';
 import { TaskModule } from './task/task.module';
 import { UsersModule } from './users/users.module';
+import { BoardsModule } from './boards/boards.module';
 
 @Module({
-  imports: [AuthModule, PassportModule, PrismaModule, JwtModule, UsersModule, TaskModule],
+  imports: [AuthModule, PassportModule, PrismaModule, JwtModule, UsersModule, BoardsModule, TaskModule],
   controllers: [AppController],
   providers: [AppService],
 })
