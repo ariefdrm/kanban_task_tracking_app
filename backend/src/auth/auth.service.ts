@@ -122,22 +122,23 @@ export class AuthService {
     const payload = { sub: userId, email, userName };
 
     const accessToken = this.jwtSerivce.sign(payload, {
-      secret: jwtContants.secret || 'secret',
+      secret: jwtContants.secret,
+      expiresIn: jwtContants.accessTokenTtl,
     });
 
     const refreshToken = this.jwtSerivce.sign(payload, {
-      secret: jwtContants.secret || 'refresh-secret',
+      secret: jwtContants.secret,
+      expiresIn: `${jwtContants.refreshTokenTtlDays}d`,
     });
 
-    const expiresAt = new Date();
-    expiresAt.setDate(expiresAt.getDate() + 7);
+    const expiresAt = new Date(Date.now() + jwtContants.refreshTokenTtlDays * 24 * 60 * 60 * 1000);
 
     await this.prisma.refreshToken.create({
       data: {
         token: refreshToken,
         device: userAgent,
         ip,
-        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        expiresAt,
         user: {
           connect: {
             id: userId,
