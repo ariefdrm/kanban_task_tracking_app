@@ -1,70 +1,101 @@
-
 import { defineStore } from 'pinia'
+import type { User, AuthTokens } from '~/types/api'
 
-interface User { id: string; name: string; email: string }
+interface AuthState {
+  user: User | null
+  accessToken: string | null
+  refreshToken: string | null
+  ready: boolean
+}
 
 export const useAuthStore = defineStore('auth', {
-  state: () => ({
-    user: null as User | null,
-    accessToken: null as string | null,
-    refreshToken: null as string | null,
+  state: (): AuthState => ({
+    user: null,
+    accessToken: null,
+    refreshToken: null,
+    ready: false,
   }),
+
   getters: {
-    isAuthenticated: (s) => !!s.accessToken && !!s.user,
+    isAuthenticated: (s) => !!s.user || !!s.accessToken,
   },
+
   actions: {
-    setAuth(data: { user: User; accessToken: string; refreshToken: string }) {
-      this.user = data.user
-      this.accessToken = data.accessToken
-      this.refreshToken = data.refreshToken
+    persistTokens(tokens: AuthTokens) {
+      this.accessToken = tokens.accessToken
+      this.refreshToken = tokens.refreshToken
       if (import.meta.client) {
-        localStorage.setItem('refreshToken', data.refreshToken)
-        localStorage.setItem('accessToken', data.accessToken)
-        localStorage.setItem('user', JSON.stringify(data.user))
+        localStorage.setItem('accessToken', tokens.accessToken)
+        localStorage.setItem('refreshToken', tokens.refreshToken)
       }
     },
+
+    persistUser(user: User | null) {
+      this.user = user
+      if (import.meta.client) {
+        if (user) localStorage.setItem('user', JSON.stringify(user))
+        else localStorage.removeItem('user')
+      }
+    },
+
     loadFromStorage() {
-      if (!import.meta.client) return
+      if (this.ready || !import.meta.client) return
       this.accessToken = localStorage.getItem('accessToken')
       this.refreshToken = localStorage.getItem('refreshToken')
-      const u = localStorage.getItem('user')
-      this.user = u ? JSON.parse(u) : null
+      const raw = localStorage.getItem('user')
+      this.user = raw ? (JSON.parse(raw) as User) : null
+      this.ready = true
     },
-    async refresh() {
-      if (!this.refreshToken) { this.logout(); return }
-      const config = useRuntimeConfig()
-      const res = await fetch(`${config.public.apiBase}/auth/refresh`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ refreshToken: this.refreshToken }),
-      })
-      if (!res.ok) { this.logout(); return }
-      const data = await res.json()
-      this.accessToken = data.accessToken
-      this.refreshToken = data.refreshToken
-      if (process.client) {
-        localStorage.setItem('accessToken', data.accessToken)
-        localStorage.setItem('refreshToken', data.refreshToken)
+
+    async login(email: string, password: string) {
+      const api = useApi()
+      const res = await api.post<{ data: AuthTokens }>('/auth/login', { email, password })
+      this.persistTokens(res.data)
+      await this.fetchMe()
+    },
+
+    async register(name: string, email: string, password: string) {
+      const api = useApi()
+      const res = await api.post<{
+        data: { user: { id: string; name: string | null; email: string; tokens: AuthTokens } }
+      }>('/auth/register', { name, email, password })
+      const { tokens, ...user } = res.data.user
+      this.persistTokens(tokens)
+      this.persistUser(user)
+    },
+
+    async fetchMe() {
+      const api = useApi()
+      try {
+        const user = await api.get<User>('/users/me')
+        this.persistUser(user)
+        return user
+      } catch (err) {
+        this.persistUser(null)
+        throw err
       }
     },
+
     async logout() {
-      const config = useRuntimeConfig()
-      if (this.refreshToken) {
-        await fetch(`${config.public.apiBase}/auth/logout`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ refreshToken: this.refreshToken }),
-        }).catch(() => { })
+      const api = useApi()
+      try {
+        await api.post('/auth/logout')
+      } catch {
+        // ignore — clear session locally regardless
       }
+      await this.clearSession()
+      await navigateTo('/login')
+    },
+
+    async clearSession() {
       this.user = null
       this.accessToken = null
       this.refreshToken = null
-      if (process.client) {
+      if (import.meta.client) {
         localStorage.removeItem('accessToken')
         localStorage.removeItem('refreshToken')
         localStorage.removeItem('user')
       }
-      navigateTo('/login')
     },
   },
 })
