@@ -44,4 +44,16 @@ export class ActivitiesService {
       take: limit,
     })
   }
+
+  async listForUser(userId: string, limit = 100, cursor?: string) {
+    return this.prisma.activity.findMany({
+      where: { board: { userId } },
+      orderBy: { createdAt: 'desc' },
+      take: limit,
+      ...(cursor ? { skip: 1, cursor: { id: cursor } } : {}),
+      include: {
+        board: { select: { id: true, name: true } },
+      },
+    })
+  }
 }
