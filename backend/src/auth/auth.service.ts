@@ -87,8 +87,10 @@ export class AuthService {
     return this.generateTokens(String(user?.id), String(user?.email), String(user?.name), userAgent, ip)
   }
 
-  async logout(refreshToken: string) {
-    await this.prisma.refreshToken.deleteMany({ where: { token: refreshToken } });
+  async logout(refreshToken: string | undefined) {
+    if (refreshToken) {
+      await this.prisma.refreshToken.deleteMany({ where: { token: refreshToken } });
+    }
     return { message: 'Logged out successfully' };
   }
 

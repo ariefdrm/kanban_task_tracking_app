@@ -97,9 +97,17 @@ export class AuthController {
 
   @Post('logout')
   @HttpCode(HttpStatus.OK)
-  logout(@Cookie('refresh_token') refreshToken: string) {
+  async logout(
+    @Cookie('refresh_token') refreshToken: string,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const result = await this.authService.logout(refreshToken)
 
-    return this.authService.logout(refreshToken);
+    const cookieOptions = { httpOnly: true, sameSite: 'lax' as const, path: '/' }
+    res.clearCookie('access_token', cookieOptions)
+    res.clearCookie('refresh_token', cookieOptions)
+
+    return result
   }
 
   @Get('me')
