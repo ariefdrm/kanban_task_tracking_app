@@ -53,6 +53,7 @@ export interface Activity {
   boardId: string
   taskId: string | null
   createdAt: string
+  board?: { id: string; name: string }
 }
 
 export interface AnalyticsSummary {
