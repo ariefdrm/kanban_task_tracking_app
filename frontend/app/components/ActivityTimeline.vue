@@ -35,6 +35,10 @@ const tones: Record<ActionMeta['tone'], string> = {
   neutral: 'bg-canvas text-ink-muted border-border dark:bg-canvas-dark dark:border-border-dark',
 }
 
+function metaOf(action: ActivityAction): ActionMeta {
+  return actionMeta[action] ?? actionMeta.TASK_UPDATED
+}
+
 function detail(activity: Activity): string | null {
   const m = activity.metadata as Record<string, unknown> | null
   if (!m) return null
@@ -84,8 +88,8 @@ const grouped = computed(() => {
 </script>
 
 <template>
-  <div>
-    <div v-if="loading && !activities.length" class="space-y-4">
+  <div class="max-w-3xl">
+    <div v-if="loading && !activities.length" class="space-y-3">
       <div
         v-for="i in 4"
         :key="i"
@@ -105,51 +109,56 @@ const grouped = computed(() => {
 
     <div v-else class="space-y-10">
       <section v-for="group in grouped" :key="group.key">
-        <header class="sticky top-16 z-10 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 bg-canvas/85 dark:bg-canvas-dark/85 backdrop-blur py-2 mb-3">
+        <div class="flex items-center gap-3 mb-4">
           <p class="eyebrow">{{ group.label }}</p>
-        </header>
+          <span class="h-px flex-1 bg-border dark:bg-border-dark" />
+        </div>
 
-        <ol class="relative border-l border-border dark:border-border-dark ml-3 pl-6 space-y-5">
+        <ol class="relative">
+          <span
+            class="absolute left-[15px] top-2 bottom-2 w-px bg-border dark:bg-border-dark"
+            aria-hidden="true"
+          />
+
           <li
             v-for="activity in group.items"
             :key="activity.id"
-            class="relative"
+            class="relative grid grid-cols-[32px_1fr] gap-4 py-2"
           >
             <span
               :class="[
-                'absolute -left-[34px] top-1 flex h-7 w-7 items-center justify-center rounded-full border',
-                tones[actionMeta[activity.action]?.tone ?? 'neutral'],
+                'relative z-10 flex h-8 w-8 items-center justify-center rounded-full border',
+                tones[metaOf(activity.action).tone],
               ]"
             >
-              <component
-                :is="(actionMeta[activity.action] ?? actionMeta.TASK_UPDATED).icon"
-                class="h-3.5 w-3.5"
-              />
+              <component :is="metaOf(activity.action).icon" class="h-3.5 w-3.5" />
             </span>
 
-            <div class="flex flex-wrap items-baseline gap-x-2 gap-y-1">
-              <p class="text-sm text-ink dark:text-ink-dark">
-                You {{ (actionMeta[activity.action] ?? actionMeta.TASK_UPDATED).label }}<span
-                  v-if="detail(activity)"
-                  class="text-ink-muted"
-                >: <span class="text-ink dark:text-ink-dark font-medium">{{ detail(activity) }}</span></span>
+            <div class="min-w-0 pt-0.5">
+              <div class="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+                <p class="text-sm text-ink dark:text-ink-dark">
+                  You {{ metaOf(activity.action).label }}<span
+                    v-if="detail(activity)"
+                    class="text-ink-muted"
+                  >: <span class="text-ink dark:text-ink-dark font-medium">{{ detail(activity) }}</span></span>
+                </p>
+                <NuxtLink
+                  v-if="activity.board"
+                  :to="`/boards/${activity.board.id}`"
+                  class="inline-flex items-center gap-1 rounded-full border border-border dark:border-border-dark bg-surface dark:bg-surface-dark px-2 py-0.5 text-[10px] font-medium text-ink-muted hover:text-ink dark:hover:text-ink-dark transition-colors"
+                >
+                  {{ activity.board.name }}
+                </NuxtLink>
+              </div>
+              <p class="mt-0.5 text-xs text-ink-muted tabular">
+                {{ formatRelativeTime(activity.createdAt) }}
               </p>
-              <NuxtLink
-                v-if="activity.board"
-                :to="`/boards/${activity.board.id}`"
-                class="inline-flex items-center gap-1 rounded-full border border-border dark:border-border-dark bg-surface dark:bg-surface-dark px-2 py-0.5 text-[10px] font-medium text-ink-muted hover:text-ink dark:hover:text-ink-dark transition-colors"
-              >
-                {{ activity.board.name }}
-              </NuxtLink>
             </div>
-            <p class="mt-0.5 text-xs text-ink-muted tabular">
-              {{ formatRelativeTime(activity.createdAt) }}
-            </p>
           </li>
         </ol>
       </section>
 
-      <div v-if="hasMore" class="flex justify-center pt-4">
+      <div v-if="hasMore" class="flex justify-center pt-2">
         <button
           type="button"
           class="inline-flex items-center gap-2 rounded-button border border-border dark:border-border-dark bg-surface dark:bg-surface-dark px-4 py-2 text-sm text-ink dark:text-ink-dark hover:border-ink/40 dark:hover:border-ink-dark/40 transition-colors disabled:opacity-50"
