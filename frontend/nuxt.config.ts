@@ -47,4 +47,10 @@ export default defineNuxtConfig({
       apiBase: 'http://localhost:8000',
     },
   },
+
+  vite: {
+    server: {
+      allowedHosts: ['.ngrok-free.app']
+    }
+  }
 })
