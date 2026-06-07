@@ -68,6 +68,18 @@ export const useAuthStore = defineStore('auth', {
       }
     },
 
+    async updateProfile(patch: { name?: string }) {
+      const api = useApi()
+      const updated = await api.patch<User>('/users/me', patch)
+      this.user = updated
+      return updated
+    },
+
+    async changePassword(payload: { currentPassword: string; newPassword: string }) {
+      const api = useApi()
+      await api.post('/users/me/password', payload)
+    },
+
     async logout() {
       const api = useApi()
       try {
