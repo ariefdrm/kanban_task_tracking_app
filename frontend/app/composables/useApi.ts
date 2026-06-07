@@ -22,7 +22,12 @@ async function attemptRefresh(apiBase: string): Promise<boolean> {
 
 export function useApi() {
   const config = useRuntimeConfig()
-  const apiBase = config.public.apiBase as string
+  // On SSR server: use private apiBase (direct backend URL, no nginx hop).
+  // On browser: use public apiBase (same-origin /api through nginx).
+  const apiBase = (import.meta.server
+    ? (config.apiBase as string) || (config.public.apiBase as string)
+    : (config.public.apiBase as string)
+  )
 
   async function request<T>(path: string, options: FetchOptions = {}): Promise<T> {
     const doFetch = () =>

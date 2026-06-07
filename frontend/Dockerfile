@@ -12,31 +12,24 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Generate Prisma client, then compile NestJS.
-# NestJS sourceRoot="src" → output lands in dist/ (not dist/src/).
-# The compiled import "../generated/prisma/client" from dist/prisma/* therefore
-# resolves to dist/generated/prisma — copy the generated JS client there.
-RUN bunx prisma generate
+# NUXT_PUBLIC_API_BASE is baked into the client bundle at build time.
+# Pass it via --build-arg and set as env var so Nuxt picks it up.
+ARG NUXT_PUBLIC_API_BASE=/api
+ENV NUXT_PUBLIC_API_BASE=$NUXT_PUBLIC_API_BASE
+
 RUN bun run build
-RUN cp -r src/generated dist/generated
 
 # ─── Stage 3: Production ──────────────────────────────────────────────────────
-FROM oven/bun:1-alpine AS production
+# Nuxt SSR output is self-contained in .output/ — no node_modules needed.
+FROM node:22-alpine AS production
 WORKDIR /app
 ENV NODE_ENV=production
 
-# Install production deps only (prisma is in dependencies — needed for migrate deploy)
-COPY package.json bun.lock ./
-RUN bun install --frozen-lockfile --production
+COPY --from=builder /app/.output ./
 
-# Compiled application + generated Prisma client
-COPY --from=builder /app/dist ./dist
+# Nuxt SSR server listens on HOST:PORT
+ENV HOST=0.0.0.0
+ENV PORT=3000
+EXPOSE 3000
 
-# Migration files (prisma migrate deploy reads these at startup)
-COPY --from=builder /app/prisma ./prisma
-
-COPY entrypoint.sh ./
-RUN chmod +x /app/entrypoint.sh
-
-EXPOSE 8000
-ENTRYPOINT ["/app/entrypoint.sh"]
+CMD ["node", "server/index.mjs"]

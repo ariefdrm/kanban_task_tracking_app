@@ -34,7 +34,12 @@ export default defineNuxtConfig({
   },
 
   runtimeConfig: {
+    // Server-side only — overridden by NUXT_API_BASE env var (used by useApi on SSR).
+    // In Docker: points directly to backend service (no nginx hop).
+    apiBase: 'http://localhost:8000',
     public: {
+      // Browser — overridden by NUXT_PUBLIC_API_BASE env var.
+      // In Docker: /api (nginx strips prefix and proxies to backend).
       apiBase: 'http://localhost:8000',
     },
   },
