@@ -84,7 +84,7 @@ function onAdd(e: SortableEvent) {
         <span :class="['inline-block h-1.5 w-1.5 rounded-full', meta.dot]" />
         <div class="min-w-0 flex-1">
           <p class="eyebrow truncate">{{ meta.label }}</p>
-          <h3 class="font-display text-base leading-tight text-ink dark:text-ink-dark tracking-display-tight truncate">
+          <h3 class="font-sans text-sm font-semibold leading-tight tracking-tight text-ink dark:text-ink-dark truncate">
             {{ column.name }}
           </h3>
         </div>
