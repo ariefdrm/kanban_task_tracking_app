@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { Plus } from 'lucide-vue-next'
 
 definePageMeta({
@@ -10,6 +10,7 @@ definePageMeta({
 useHead({ title: 'Dashboard — TaskFlow' })
 
 const auth = useAuthStore()
+const analytics = useAnalyticsStore()
 
 const greeting = computed(() => {
   const name = auth.user?.name || auth.user?.email?.split('@')[0] || 'there'
@@ -28,6 +29,15 @@ function openCreate() {
 function onCreated(boardId: string) {
   navigateTo(`/boards/${boardId}`)
 }
+
+onMounted(() => {
+  if (!analytics.trend.length) {
+    analytics.fetchTrend(14).catch(() => {})
+  }
+  if (!analytics.distribution.length) {
+    analytics.fetchDistribution().catch(() => {})
+  }
+})
 </script>
 
 <template>
@@ -47,9 +57,11 @@ function onCreated(boardId: string) {
       <DashboardStats />
 
       <div class="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
-        <RecentBoards @create-board="openCreate" />
-        <RecentActivities />
+        <CompletionTrendChart :data="analytics.trend" :loading="analytics.loadingTrend" />
+        <StatusDistributionChart :data="analytics.distribution" :loading="analytics.loadingDistribution" />
       </div>
+
+      <RecentBoards @create-board="openCreate" />
     </div>
 
     <CreateBoardModal :open="createOpen" @close="createOpen = false" @created="onCreated" />
