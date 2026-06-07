@@ -18,7 +18,7 @@ async function handleLogout() {
   <header
     class="sticky top-0 z-20 bg-canvas/80 backdrop-blur border-b border-border dark:bg-canvas-dark/80 dark:border-border-dark"
   >
-    <div class="h-16 px-4 sm:px-6 flex items-center gap-3">
+    <div class="h-16 px-4 sm:px-6 lg:px-8 flex items-center gap-3">
       <button
         type="button"
         class="lg:hidden inline-flex h-9 w-9 items-center justify-center rounded-button text-ink-muted hover:bg-canvas hover:text-ink dark:hover:bg-canvas-dark dark:hover:text-ink-dark"
@@ -29,10 +29,13 @@ async function handleLogout() {
       </button>
 
       <div class="min-w-0 flex-1">
-        <h1 v-if="title" class="text-base font-semibold text-ink dark:text-ink-dark truncate">
+        <h1
+          v-if="title"
+          class="font-display text-xl sm:text-[1.65rem] font-normal leading-tight tracking-display-tight text-ink dark:text-ink-dark truncate"
+        >
           {{ title }}
         </h1>
-        <p v-if="description" class="text-xs text-ink-muted truncate">
+        <p v-if="description" class="text-xs text-ink-muted truncate mt-0.5">
           {{ description }}
         </p>
         <slot />

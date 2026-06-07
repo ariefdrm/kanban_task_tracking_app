@@ -39,24 +39,28 @@ const links = [
       <AppLogo />
     </div>
 
-    <nav class="flex-1 px-3 py-4 space-y-1 overflow-y-auto scrollbar-thin">
+    <div class="px-6 pt-5 pb-2">
+      <p class="eyebrow">Workspace</p>
+    </div>
+    <nav class="flex-1 px-3 pb-4 space-y-0.5 overflow-y-auto scrollbar-thin">
       <NuxtLink
         v-for="link in links"
         :key="link.to"
         :to="link.to"
-        active-class="bg-accent-soft text-accent dark:bg-accent-softDark"
-        class="group flex items-center gap-3 rounded-button px-3 h-10 text-sm font-medium text-ink-muted hover:bg-canvas hover:text-ink dark:hover:bg-canvas-dark dark:hover:text-ink-dark transition-colors"
+        active-class="!text-ink dark:!text-ink-dark bg-accent-soft/60 dark:bg-accent-softDark"
+        class="group relative flex items-center gap-3 rounded-button px-3 h-10 text-sm font-medium text-ink-muted hover:text-ink dark:hover:text-ink-dark transition-colors duration-200 ease-out-expo"
         @click="close"
       >
-        <component :is="link.icon" class="h-4 w-4 flex-shrink-0" />
+        <component :is="link.icon" class="h-4 w-4 flex-shrink-0 transition-transform duration-300 ease-out-expo group-hover:scale-110" />
         <span>{{ link.label }}</span>
       </NuxtLink>
     </nav>
 
-    <div class="p-4 border-t border-border dark:border-border-dark">
-      <p class="text-[11px] text-ink-muted leading-relaxed">
-        TaskFlow MVP · Stay focused. Ship more.
+    <div class="px-6 py-5 border-t border-border dark:border-border-dark">
+      <p class="font-display italic text-sm text-ink dark:text-ink-dark leading-snug">
+        Stay focused.<br>Ship more.
       </p>
+      <p class="mt-2 eyebrow">TaskFlow · MVP 1.0</p>
     </div>
   </aside>
 </template>

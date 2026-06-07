@@ -40,10 +40,11 @@ const features = [
 
       <div class="mt-10 grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <AppCard v-for="f in features" :key="f.title">
-          <div class="flex h-9 w-9 items-center justify-center rounded-button bg-accent-soft text-accent dark:bg-accent-softDark">
+          <div
+            class="flex h-9 w-9 items-center justify-center rounded-button bg-accent-soft text-accent dark:bg-accent-softDark">
             <component :is="f.icon" class="h-4 w-4" />
           </div>
-          <h3 class="mt-4 text-sm font-semibold text-ink dark:text-ink-dark">
+          <h3 class="mt-4 text-xl tracking-wide font-semibold text-ink dark:text-ink-dark">
             {{ f.title }}
           </h3>
           <p class="mt-1.5 text-sm text-ink-muted leading-relaxed">

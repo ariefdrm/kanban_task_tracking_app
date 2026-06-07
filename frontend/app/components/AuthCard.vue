@@ -15,51 +15,60 @@ withDefaults(
 
 <template>
   <div class="min-h-screen grid grid-cols-1 lg:grid-cols-[5fr_6fr]">
-    <!-- Brand panel -->
-    <div class="hidden lg:flex flex-col justify-between p-12 bg-surface dark:bg-surface-dark border-r border-border dark:border-border-dark relative overflow-hidden">
+    <!-- Editorial brand panel -->
+    <div class="hidden lg:flex flex-col justify-between p-14 bg-canvas dark:bg-canvas-dark border-r border-border dark:border-border-dark relative overflow-hidden grain">
       <AppLogo size="lg" />
 
-      <div class="relative z-10 max-w-sm">
-        <p class="text-xl font-semibold leading-snug text-ink dark:text-ink-dark">
-          "{{ quote }}"
-        </p>
-        <p class="mt-3 text-sm text-ink-muted">— {{ quoteAuthor }}</p>
+      <figure class="relative z-10 max-w-md">
+        <span class="font-display text-7xl leading-none text-accent dark:text-accent-ink select-none" aria-hidden="true">"</span>
+        <blockquote class="-mt-6 font-display text-3xl font-light leading-[1.15] tracking-display-tight text-ink dark:text-ink-dark">
+          {{ quote }}
+        </blockquote>
+        <figcaption class="mt-5 flex items-center gap-3">
+          <span class="h-px w-8 bg-ink/40 dark:bg-ink-dark/40" />
+          <span class="eyebrow">{{ quoteAuthor }}</span>
+        </figcaption>
+      </figure>
+
+      <div class="relative z-10 flex items-end justify-between">
+        <p class="eyebrow">Visual Task Tracking</p>
+        <p class="font-display italic text-sm text-ink-muted">Est. 2026</p>
       </div>
 
-      <p class="relative z-10 text-xs text-ink-muted">
-        TaskFlow · Visual task tracking
-      </p>
-
-      <!-- Subtle decorative shapes -->
-      <div
-        class="pointer-events-none absolute -bottom-32 -right-24 h-80 w-80 rounded-full border border-accent/20"
+      <!-- decorative deep-cut chevron -->
+      <svg
+        class="pointer-events-none absolute -bottom-20 -right-20 h-[28rem] w-[28rem] text-accent/8 dark:text-accent-ink/10"
+        viewBox="0 0 200 200"
+        fill="none"
         aria-hidden="true"
-      />
-      <div
-        class="pointer-events-none absolute -top-12 -right-12 h-40 w-40 rounded-full bg-accent-soft/60 dark:bg-accent-softDark"
-        aria-hidden="true"
-      />
+      >
+        <circle cx="100" cy="100" r="80" stroke="currentColor" stroke-width="0.6" />
+        <circle cx="100" cy="100" r="60" stroke="currentColor" stroke-width="0.6" />
+        <circle cx="100" cy="100" r="40" stroke="currentColor" stroke-width="0.6" />
+        <circle cx="100" cy="100" r="20" stroke="currentColor" stroke-width="0.6" />
+      </svg>
     </div>
 
-    <!-- Content panel -->
-    <div class="flex flex-col items-stretch justify-center px-6 py-10 sm:px-12">
+    <!-- Form panel -->
+    <div class="relative flex flex-col items-stretch justify-center px-6 py-10 sm:px-12 bg-surface dark:bg-surface-dark">
       <div class="lg:hidden mb-8">
         <AppLogo />
       </div>
 
       <div class="w-full max-w-sm mx-auto">
-        <h1 class="text-2xl font-semibold tracking-tight text-ink dark:text-ink-dark">
+        <p class="eyebrow">{{ title.includes('Welcome') ? 'Sign in' : 'New account' }}</p>
+        <h1 class="mt-3 font-display text-4xl font-normal leading-[1.05] tracking-display-tight text-ink dark:text-ink-dark">
           {{ title }}
         </h1>
-        <p v-if="description" class="mt-2 text-sm text-ink-muted">
+        <p v-if="description" class="mt-3 text-sm text-ink-muted leading-relaxed max-w-xs">
           {{ description }}
         </p>
 
-        <div class="mt-8">
+        <div class="mt-9">
           <slot />
         </div>
 
-        <div v-if="$slots.footer" class="mt-6 text-center text-sm text-ink-muted">
+        <div v-if="$slots.footer" class="mt-7 text-center text-sm text-ink-muted">
           <slot name="footer" />
         </div>
       </div>

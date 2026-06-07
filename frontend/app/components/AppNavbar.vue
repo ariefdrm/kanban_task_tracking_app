@@ -1,7 +1,9 @@
 <script setup lang="ts">
 const auth = useAuthStore()
 
-if (import.meta.client) auth.loadFromStorage()
+if (import.meta.client && !auth.ready) {
+  auth.init()
+}
 </script>
 
 <template>

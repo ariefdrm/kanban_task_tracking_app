@@ -14,59 +14,82 @@ export default {
     extend: {
       colors: {
         canvas: {
-          DEFAULT: '#F9F9F7',
-          dark: '#121212',
+          DEFAULT: '#F5F1E8',
+          dark: '#15140F',
         },
         surface: {
-          DEFAULT: '#FFFFFF',
-          dark: '#1E1E1E',
+          DEFAULT: '#FBF8EF',
+          dark: '#1C1B16',
         },
         ink: {
-          DEFAULT: '#1A1A1A',
-          dark: '#E4E4E7',
-          muted: '#8E8E93',
+          DEFAULT: '#1A1814',
+          dark: '#EFEAD9',
+          muted: '#736E63',
+          'muted-dark': '#9A9384',
         },
         border: {
-          DEFAULT: '#E5E5E2',
-          dark: '#2A2A2A',
+          DEFAULT: '#E5DECC',
+          dark: '#2E2B23',
         },
         accent: {
-          DEFAULT: '#6366F1',
-          soft: '#EEF0FF',
-          softDark: '#22243A',
+          DEFAULT: '#1F4F58',
+          soft: '#E2EDEC',
+          softDark: '#1B2E31',
+          ink: '#7BB6BC',
         },
         success: {
-          DEFAULT: '#4CAF50',
-          soft: '#E8F5E9',
-          softDark: '#1B2A1C',
+          DEFAULT: '#4F6D3F',
+          soft: '#E7EDDF',
+          softDark: '#1E2A1A',
         },
         warning: {
-          DEFAULT: '#F4B942',
-          soft: '#FEF6E1',
-          softDark: '#2E2516',
+          DEFAULT: '#C57A2E',
+          soft: '#F6E8D4',
+          softDark: '#2E2316',
         },
         danger: {
-          DEFAULT: '#E57373',
-          soft: '#FBECEC',
-          softDark: '#2E1B1B',
+          DEFAULT: '#A8443A',
+          soft: '#F2DBD7',
+          softDark: '#2E1A18',
         },
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
+        sans: ['"Geist"', 'system-ui', 'sans-serif'],
+        display: ['"Fraunces"', 'Georgia', 'serif'],
+      },
+      letterSpacing: {
+        'display-tight': '-0.022em',
+        eyebrow: '0.18em',
       },
       borderRadius: {
-        button: '8px',
-        input: '8px',
-        card: '12px',
-        modal: '16px',
+        button: '10px',
+        input: '10px',
+        card: '14px',
+        modal: '18px',
       },
       boxShadow: {
-        card: '0 1px 3px rgba(0, 0, 0, 0.08)',
-        'card-dark': '0 1px 3px rgba(0, 0, 0, 0.25)',
-        focus: '0 0 0 3px rgba(99, 102, 241, 0.25)',
+        card: '0 1px 2px rgba(26, 24, 20, 0.04), 0 8px 24px -12px rgba(26, 24, 20, 0.08)',
+        'card-dark':
+          '0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px -12px rgba(0, 0, 0, 0.5)',
+        elevated:
+          '0 2px 4px rgba(26, 24, 20, 0.05), 0 24px 48px -20px rgba(26, 24, 20, 0.18)',
+        focus: '0 0 0 3px rgba(31, 79, 88, 0.22)',
+      },
+      transitionTimingFunction: {
+        'out-expo': 'cubic-bezier(0.16, 1, 0.3, 1)',
+        'out-quart': 'cubic-bezier(0.25, 1, 0.5, 1)',
       },
       transitionDuration: {
-        DEFAULT: '180ms',
+        DEFAULT: '220ms',
+      },
+      keyframes: {
+        'rise-in': {
+          '0%': { opacity: '0', transform: 'translateY(8px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+      },
+      animation: {
+        'rise-in': 'rise-in 600ms cubic-bezier(0.16, 1, 0.3, 1) both',
       },
     },
   },

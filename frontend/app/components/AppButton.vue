@@ -27,14 +27,15 @@ const props = withDefaults(
 
 const variants: Record<Variant, string> = {
   primary:
-    'bg-accent text-white hover:bg-accent/90 active:bg-accent/95 shadow-sm',
+    'bg-ink text-canvas hover:bg-ink/90 active:translate-y-px shadow-sm ' +
+    'dark:bg-ink-dark dark:text-canvas-dark dark:hover:bg-ink-dark/90',
   secondary:
-    'bg-surface text-ink hover:bg-canvas border border-border ' +
-    'dark:bg-surface-dark dark:text-ink-dark dark:border-border-dark dark:hover:bg-canvas-dark',
+    'bg-surface text-ink hover:border-ink/40 border border-border ' +
+    'dark:bg-surface-dark dark:text-ink-dark dark:border-border-dark dark:hover:border-ink-dark/40',
   danger:
-    'bg-danger text-white hover:bg-danger/90 active:bg-danger/95 shadow-sm',
+    'bg-danger text-white hover:bg-danger/90 active:translate-y-px shadow-sm',
   ghost:
-    'bg-transparent text-ink hover:bg-canvas ' +
+    'bg-transparent text-ink hover:bg-surface ' +
     'dark:text-ink-dark dark:hover:bg-surface-dark',
 }
 
@@ -56,10 +57,9 @@ const iconSizes: Record<Size, string> = {
     :type="type"
     :disabled="disabled || loading"
     :class="[
-      'inline-flex items-center justify-center rounded-button font-medium transition-colors duration-150',
+      'inline-flex items-center justify-center rounded-button font-medium transition-all duration-200 ease-out-expo',
       'disabled:opacity-50 disabled:cursor-not-allowed',
-      'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-canvas',
-      'dark:focus-visible:ring-offset-canvas-dark',
+      'focus-visible:outline-none',
       icon ? iconSizes[size] : sizes[size],
       variants[variant],
       block ? 'w-full' : '',
