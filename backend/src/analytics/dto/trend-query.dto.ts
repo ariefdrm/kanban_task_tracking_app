@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer';
-import { IsInt, IsOptional, IsUUID, Max, Min } from 'class-validator';
+import { IsInt, IsOptional, IsString, IsUUID, Length, Max, Min } from 'class-validator';
 
 export class TrendQueryDto {
   @IsOptional()
@@ -12,4 +12,9 @@ export class TrendQueryDto {
   @IsOptional()
   @IsUUID()
   boardId?: string;
+
+  @IsOptional()
+  @IsString()
+  @Length(1, 64)
+  tz?: string;
 }

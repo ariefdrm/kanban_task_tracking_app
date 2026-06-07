@@ -17,7 +17,17 @@ export class AnalyticsController {
 
   @Get('trend')
   trend(@Req() req: Request, @Query() query: TrendQueryDto) {
-    return this.analyticsService.trend(this.userId(req), query.days ?? 14, query.boardId)
+    return this.analyticsService.trend(
+      this.userId(req),
+      query.days ?? 14,
+      query.boardId,
+      query.tz,
+    )
+  }
+
+  @Get('distribution')
+  distribution(@Req() req: Request, @Query() query: SummaryQueryDto) {
+    return this.analyticsService.distribution(this.userId(req), query.boardId)
   }
 
   private userId(req: Request) {
