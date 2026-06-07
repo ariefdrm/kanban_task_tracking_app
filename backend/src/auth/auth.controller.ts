@@ -15,12 +15,26 @@ export class AuthController {
 
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
-  register(
+  async register(
+    @Res({ passthrough: true }) res: Response,
     @Body() dto: RegisterDTO,
     @Ip() ip: string,
     @Headers('user-agent') userAgent: string
   ) {
-    return this.authService.register(dto, userAgent, ip);
+    const result = await this.authService.register(dto, userAgent, ip);
+    const { accessToken, refreshToken } = result.data.user.tokens;
+
+    res.cookie('access_token', accessToken, {
+      httpOnly: true,
+      sameSite: 'lax',
+    })
+
+    res.cookie('refresh_token', refreshToken, {
+      httpOnly: true,
+      sameSite: 'lax',
+    })
+
+    return result;
   }
 
   @Post('login')
