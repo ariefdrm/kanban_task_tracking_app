@@ -1,77 +1,69 @@
 import { defineStore } from 'pinia'
-import type { User, AuthTokens } from '~/types/api'
+import type { User } from '~/types/api'
 
 interface AuthState {
   user: User | null
-  accessToken: string | null
-  refreshToken: string | null
   ready: boolean
+  initInflight: Promise<void> | null
 }
 
 export const useAuthStore = defineStore('auth', {
   state: (): AuthState => ({
     user: null,
-    accessToken: null,
-    refreshToken: null,
     ready: false,
+    initInflight: null,
   }),
 
   getters: {
-    isAuthenticated: (s) => !!s.user || !!s.accessToken,
+    isAuthenticated: (s) => !!s.user,
   },
 
   actions: {
-    persistTokens(tokens: AuthTokens) {
-      this.accessToken = tokens.accessToken
-      this.refreshToken = tokens.refreshToken
-      if (import.meta.client) {
-        localStorage.setItem('accessToken', tokens.accessToken)
-        localStorage.setItem('refreshToken', tokens.refreshToken)
-      }
-    },
+    async init(force = false) {
+      if (!import.meta.client) return
+      if (this.ready && !force) return
+      if (this.initInflight) return this.initInflight
 
-    persistUser(user: User | null) {
-      this.user = user
-      if (import.meta.client) {
-        if (user) localStorage.setItem('user', JSON.stringify(user))
-        else localStorage.removeItem('user')
-      }
-    },
+      clearLegacyStorage()
 
-    loadFromStorage() {
-      if (this.ready || !import.meta.client) return
-      this.accessToken = localStorage.getItem('accessToken')
-      this.refreshToken = localStorage.getItem('refreshToken')
-      const raw = localStorage.getItem('user')
-      this.user = raw ? (JSON.parse(raw) as User) : null
-      this.ready = true
+      this.initInflight = (async () => {
+        const api = useApi()
+        try {
+          const user = await api.get<User>('/users/me')
+          this.user = user
+        } catch {
+          this.user = null
+        } finally {
+          this.ready = true
+          this.initInflight = null
+        }
+      })()
+
+      return this.initInflight
     },
 
     async login(email: string, password: string) {
       const api = useApi()
-      const res = await api.post<{ data: AuthTokens }>('/auth/login', { email, password })
-      this.persistTokens(res.data)
+      await api.post('/auth/login', { email, password })
       await this.fetchMe()
     },
 
     async register(name: string, email: string, password: string) {
       const api = useApi()
-      const res = await api.post<{
-        data: { user: { id: string; name: string | null; email: string; tokens: AuthTokens } }
-      }>('/auth/register', { name, email, password })
-      const { tokens, ...user } = res.data.user
-      this.persistTokens(tokens)
-      this.persistUser(user)
+      await api.post('/auth/register', { name, email, password })
+      await this.fetchMe()
     },
 
     async fetchMe() {
       const api = useApi()
       try {
         const user = await api.get<User>('/users/me')
-        this.persistUser(user)
+        this.user = user
+        this.ready = true
         return user
       } catch (err) {
-        this.persistUser(null)
+        this.user = null
+        this.ready = true
         throw err
       }
     },
@@ -83,19 +75,25 @@ export const useAuthStore = defineStore('auth', {
       } catch {
         // ignore — clear session locally regardless
       }
-      await this.clearSession()
+      this.clearSession()
       await navigateTo('/login')
     },
 
-    async clearSession() {
+    clearSession() {
       this.user = null
-      this.accessToken = null
-      this.refreshToken = null
-      if (import.meta.client) {
-        localStorage.removeItem('accessToken')
-        localStorage.removeItem('refreshToken')
-        localStorage.removeItem('user')
-      }
+      this.ready = true
+      clearLegacyStorage()
     },
   },
 })
+
+function clearLegacyStorage() {
+  if (!import.meta.client) return
+  try {
+    localStorage.removeItem('accessToken')
+    localStorage.removeItem('refreshToken')
+    localStorage.removeItem('user')
+  } catch {
+    // localStorage may be unavailable in some environments — ignore
+  }
+}
