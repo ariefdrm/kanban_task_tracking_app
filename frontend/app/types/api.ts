@@ -67,6 +67,11 @@ export interface TrendPoint {
   completed: number
 }
 
+export interface StatusDistributionPoint {
+  status: ColumnType
+  count: number
+}
+
 export interface AuthTokens {
   accessToken: string
   refreshToken: string

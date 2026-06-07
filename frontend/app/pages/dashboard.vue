@@ -43,7 +43,7 @@ function onCreated(boardId: string) {
       </AppButton>
     </template>
 
-    <div class="space-y-6 max-w-6xl">
+    <div class="space-y-6">
       <DashboardStats />
 
       <div class="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
