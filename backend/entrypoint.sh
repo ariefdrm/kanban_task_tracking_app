@@ -5,4 +5,4 @@ echo "[entrypoint] Running database migrations..."
 bunx prisma migrate deploy
 
 echo "[entrypoint] Starting application..."
-exec bun dist/main.js
+exec bun dist/src/main.js

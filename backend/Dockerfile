@@ -34,6 +34,7 @@ COPY --from=builder /app/dist ./dist
 
 # Migration files (prisma migrate deploy reads these at startup)
 COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/prisma.config.ts ./
 
 COPY entrypoint.sh ./
 RUN chmod +x /app/entrypoint.sh
