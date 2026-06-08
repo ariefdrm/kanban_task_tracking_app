@@ -5,6 +5,12 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
 
+  // SPA mode: auth lives in httpOnly cookies that Nuxt's SSR pipeline can't
+  // forward to the auth store on the first request. Rendering everything on
+  // the client avoids the bounce-through-/login flash and hydration mismatches
+  // around time-of-day greetings, color mode, and authenticated user data.
+  ssr: false,
+
   modules: [
     '@nuxtjs/tailwindcss',
     '@nuxt/image',

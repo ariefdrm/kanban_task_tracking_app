@@ -88,7 +88,7 @@ const grouped = computed(() => {
 </script>
 
 <template>
-  <div class="max-w-3xl">
+  <div>
     <div v-if="loading && !activities.length" class="space-y-3">
       <div
         v-for="i in 4"
