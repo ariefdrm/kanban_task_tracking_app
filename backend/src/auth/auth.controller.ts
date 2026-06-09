@@ -1,4 +1,5 @@
 import { Controller, Post, Body, HttpCode, HttpStatus, Ip, Headers, Res, Get, Req, UnauthorizedException } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiCookieAuth } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { LoginDTO } from './dto/login.dto';
 import { RegisterDTO } from './dto/register.dto';
@@ -6,15 +7,18 @@ import type { Request, Response } from 'express';
 import { RefreshDto } from './dto/refresh.dto';
 import { Cookie } from './decorator/cookie.decorator';
 
+@ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
   ) { }
 
-
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Register a new user' })
+  @ApiResponse({ status: 201, description: 'User registered, tokens set as cookies' })
+  @ApiResponse({ status: 400, description: 'Validation error' })
   async register(
     @Res({ passthrough: true }) res: Response,
     @Body() dto: RegisterDTO,
@@ -41,6 +45,9 @@ export class AuthController {
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Log in and receive tokens' })
+  @ApiResponse({ status: 200, description: 'Login successful, tokens returned and set as cookies' })
+  @ApiResponse({ status: 401, description: 'Invalid credentials' })
   async login(
     @Res({ passthrough: true }) res: Response,
     @Body() dto: LoginDTO,
@@ -71,6 +78,10 @@ export class AuthController {
 
   @Post('refresh')
   @HttpCode(HttpStatus.ACCEPTED)
+  @ApiCookieAuth('refresh_token')
+  @ApiOperation({ summary: 'Rotate refresh token using refresh_token cookie' })
+  @ApiResponse({ status: 202, description: 'New token pair issued' })
+  @ApiResponse({ status: 401, description: 'Missing or invalid refresh token' })
   async refresh(
     @Cookie('refresh_token') getRefreshToken: string,
     @Res({ passthrough: true }) res: Response,
@@ -103,6 +114,9 @@ export class AuthController {
 
   @Post('logout')
   @HttpCode(HttpStatus.OK)
+  @ApiCookieAuth('refresh_token')
+  @ApiOperation({ summary: 'Log out and clear auth cookies' })
+  @ApiResponse({ status: 200, description: 'Logged out successfully' })
   async logout(
     @Cookie('refresh_token') refreshToken: string,
     @Res({ passthrough: true }) res: Response,
@@ -117,6 +131,10 @@ export class AuthController {
   }
 
   @Get('me')
+  @ApiCookieAuth('access_token')
+  @ApiOperation({ summary: 'Get current user from access_token cookie' })
+  @ApiResponse({ status: 200, description: 'Current user data' })
+  @ApiResponse({ status: 401, description: 'Not authenticated' })
   me(
     @Cookie('access_token') accessToken: string
   ) {

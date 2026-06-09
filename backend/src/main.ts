@@ -17,7 +17,10 @@ async function bootstrap() {
   )
 
   const config = new DocumentBuilder()
-    .setTitle('Api Documentation')
+    .setTitle('Kanban Task Tracking API')
+    .setDescription('REST API for the Kanban task tracking application')
+    .setVersion('1.0')
+    .addBearerAuth({ type: 'http', scheme: 'bearer', bearerFormat: 'JWT' })
     .build()
 
   const documentFactory = () => SwaggerModule.createDocument(app, config)
