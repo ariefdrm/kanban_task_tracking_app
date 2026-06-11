@@ -37,7 +37,9 @@ watch(
   (task) => {
     form.title = task?.title ?? ''
     form.description = task?.description ?? ''
-    form.priority = task?.priority ?? 'MEDIUM'
+    // Edit the user's own baseline, not the (possibly auto-raised) effective
+    // priority — otherwise saving would lock a deadline escalation in place.
+    form.priority = task?.basePriority ?? 'MEDIUM'
     form.dueDate = task?.dueDate ? toDateInput(task.dueDate) : ''
     errors.title = null
   },

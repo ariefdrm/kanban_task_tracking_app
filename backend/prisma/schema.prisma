@@ -37,8 +37,14 @@ enum ActivityAction {
 model User {
   id        String   @id @default(uuid()) @db.Uuid
   email     String   @unique
-  password  String
+  // Null for accounts created via an OAuth provider (e.g. Google), which have
+  // no local password.
+  password  String?
   name      String?
+  // OAuth / identity provider fields.
+  provider  String   @default("local") // "local" | "google"
+  googleId  String?  @unique
+  avatarUrl String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -99,7 +105,12 @@ model Task {
   id          String       @id @default(uuid()) @db.Uuid
   title       String
   description String?
+  // Effective priority shown to the user — may be auto-raised as the deadline
+  // approaches (see basePriority + the deadline-escalation job).
   priority    TaskPriority @default(MEDIUM)
+  // The priority the user set manually. Auto-escalation never lowers `priority`
+  // below this, and the gap (priority > basePriority) flags an auto-raise.
+  basePriority TaskPriority @default(MEDIUM)
   position    Int
   dueDate     DateTime?
   createdAt   DateTime     @default(now())

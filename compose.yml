@@ -43,6 +43,13 @@ services:
       JWT_SECRET:  ${JWT_SECRET}
       SALT_ROUND:  ${SALT_ROUND}
       CORS_ORIGIN: ${CORS_ORIGIN}
+      # ── Google OAuth ──
+      GOOGLE_CLIENT_ID:     ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      # Public, browser-reachable callback (nginx strips the /api prefix).
+      GOOGLE_CALLBACK_URL:  ${GOOGLE_CALLBACK_URL:-http://localhost/api/auth/google/callback}
+      # Where the OAuth callback redirects the browser after login (same origin).
+      FRONTEND_URL:         ${FRONTEND_URL:-http://localhost}
     networks:
       - kanban_net
     healthcheck:

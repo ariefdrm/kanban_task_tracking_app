@@ -20,7 +20,11 @@ export interface Task {
   id: string
   title: string
   description: string | null
+  // Effective priority — may be auto-raised as the deadline nears.
   priority: TaskPriority
+  // The user's manually-set priority. When `priority` outranks this, the
+  // task was escalated automatically because its deadline is close.
+  basePriority: TaskPriority
   position: number
   dueDate: string | null
   columnId: string

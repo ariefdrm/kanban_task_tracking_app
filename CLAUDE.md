@@ -87,6 +87,7 @@ src/
 - **Register / Login** returns both `accessToken` and `refreshToken` in the response body **and** sets them as `httpOnly` cookies (`access_token`, `refresh_token`).
 - **Protected routes** use `@UseGuards(JwtAuthGuard)` which reads the JWT from the `Authorization` header via `JwtStrategy`.
 - **Refresh token rotation**: on `POST /auth/refresh`, the old DB record is deleted and a new pair is issued. Tokens expire 7 days from creation in the DB.
+- **Google OAuth**: `GET /auth/google` starts the flow; `GET /auth/google/callback` (both guarded by `AuthGuard('google')`, see `strategies/google.strategy.ts`) resolves/creates the user, issues the same token pair + cookies, then redirects to `${FRONTEND_URL}/dashboard` (or `/login?error=oauth` on failure). OAuth accounts have a `null` `password` (`provider`/`googleId`/`avatarUrl` columns on `user`); password login and `changePassword` reject them.
 - `@Cookie('key')` decorator (in `src/auth/decorator/cookie.decorator.ts`) extracts a named cookie from the request.
 
 ### Prisma
@@ -95,14 +96,18 @@ src/
 
 ### Key env vars (backend `.env`)
 
-| Variable       | Purpose                                                                                            |
-| -------------- | -------------------------------------------------------------------------------------------------- |
-| `DATABASE_URL` | PostgreSQL connection string                                                                       |
-| `PORT`         | Server port (default 3000, set to 8000 in .env)                                                    |
-| `SECRET`       | JWT signing secret — note: `src/auth/contants.ts` reads `process.env.SECRET`, **not** `JWT_SECRET` |
-| `SALT_ROUND`   | bcrypt salt rounds                                                                                 |
+| Variable               | Purpose                                                                                                                  |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `DATABASE_URL`         | PostgreSQL connection string                                                                                             |
+| `PORT`                 | Server port (default 3000, set to 8000 in .env)                                                                         |
+| `JWT_SECRET`           | JWT signing secret — read by `src/auth/contants.ts` (`process.env.JWT_SECRET`)                                          |
+| `SALT_ROUND`           | bcrypt salt rounds                                                                                                       |
+| `GOOGLE_CLIENT_ID`     | Google OAuth client ID (from Google Cloud Console → Credentials → OAuth Client, type "Web application")                  |
+| `GOOGLE_CLIENT_SECRET` | Google OAuth client secret                                                                                              |
+| `GOOGLE_CALLBACK_URL`  | OAuth redirect URI — **must match the URI registered in Google Console**. Dev default `http://localhost:8000/auth/google/callback`; Docker `http://localhost/api/auth/google/callback` (nginx strips `/api`) |
+| `FRONTEND_URL`         | Origin the OAuth callback redirects to after login. Dev default `http://localhost:3000`; Docker `http://localhost`      |
 
-> **Known issue**: `.env` defines `JWT_SECRET` but `contants.ts` reads `SECRET`. The JWT secret will be `undefined` unless the env var is renamed to `SECRET` (or `contants.ts` is updated).
+Google OAuth vars are read in `src/auth/contants.ts` (`googleOAuthConstants`). `GOOGLE_CALLBACK_URL` and `FRONTEND_URL` have dev defaults, so only the client ID/secret are strictly required for local dev. For Docker, all four are templated in `.env.docker` and wired into the `backend` service in `compose.yml`.
 
 ---
 

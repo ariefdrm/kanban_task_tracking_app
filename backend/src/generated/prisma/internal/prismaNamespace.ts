@@ -897,6 +897,9 @@ export const UserScalarFieldEnum = {
   email: 'email',
   password: 'password',
   name: 'name',
+  provider: 'provider',
+  googleId: 'googleId',
+  avatarUrl: 'avatarUrl',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -945,6 +948,7 @@ export const TaskScalarFieldEnum = {
   title: 'title',
   description: 'description',
   priority: 'priority',
+  basePriority: 'basePriority',
   position: 'position',
   dueDate: 'dueDate',
   createdAt: 'createdAt',

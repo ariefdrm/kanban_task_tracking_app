@@ -1,11 +1,16 @@
-import { Controller, Post, Body, HttpCode, HttpStatus, Ip, Headers, Res, Get, Req, UnauthorizedException } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiCookieAuth } from '@nestjs/swagger';
+import { Controller, Post, Body, HttpCode, HttpStatus, Ip, Headers, Res, Get, Req, UnauthorizedException, UseGuards } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
+import { ApiTags, ApiOperation, ApiResponse, ApiCookieAuth, ApiExcludeEndpoint } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { LoginDTO } from './dto/login.dto';
 import { RegisterDTO } from './dto/register.dto';
 import type { Request, Response } from 'express';
 import { RefreshDto } from './dto/refresh.dto';
 import { Cookie } from './decorator/cookie.decorator';
+import { googleOAuthConstants } from './contants';
+
+const ACCESS_TOKEN_MAX_AGE = 15 * 60 * 1000;
+const REFRESH_TOKEN_MAX_AGE = 7 * 24 * 60 * 60 * 1000;
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -26,20 +31,7 @@ export class AuthController {
     @Headers('user-agent') userAgent: string
   ) {
     const result = await this.authService.register(dto, userAgent, ip);
-    const { accessToken, refreshToken } = result.data.user.tokens;
-
-    res.cookie('access_token', accessToken, {
-      httpOnly: true,
-      sameSite: 'lax',
-      maxAge: 15 * 60 * 1000,
-    })
-
-    res.cookie('refresh_token', refreshToken, {
-      httpOnly: true,
-      sameSite: 'lax',
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    })
-
+    this.setAuthCookies(res, result.data.user.tokens)
     return result;
   }
 
@@ -56,17 +48,7 @@ export class AuthController {
   ) {
     const { refreshToken, accessToken } = await this.authService.login(dto, userAgent, ip)
 
-    res.cookie('access_token', accessToken, {
-      httpOnly: true,
-      sameSite: 'lax',
-      maxAge: 15 * 60 * 1000,
-    })
-
-    res.cookie('refresh_token', refreshToken, {
-      httpOnly: true,
-      sameSite: 'lax',
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    })
+    this.setAuthCookies(res, { accessToken, refreshToken })
 
     return {
       data: {
@@ -92,17 +74,7 @@ export class AuthController {
 
     const { refreshToken, accessToken } = await this.authService.refresh(getRefreshToken, userAgent, ip);
 
-    res.cookie('access_token', accessToken, {
-      httpOnly: true,
-      sameSite: 'lax',
-      maxAge: 15 * 60 * 1000,
-    })
-
-    res.cookie('refresh_token', refreshToken, {
-      httpOnly: true,
-      sameSite: 'lax',
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    })
+    this.setAuthCookies(res, { accessToken, refreshToken })
 
     return {
       data: {
@@ -139,5 +111,48 @@ export class AuthController {
     @Cookie('access_token') accessToken: string
   ) {
     return this.authService.me(accessToken)
+  }
+
+  @Get('google')
+  @UseGuards(AuthGuard('google'))
+  @ApiOperation({ summary: 'Start Google OAuth login (redirects to Google)' })
+  // The guard redirects to Google; this handler is never actually reached.
+  googleAuth() {
+    return
+  }
+
+  @Get('google/callback')
+  @UseGuards(AuthGuard('google'))
+  @ApiExcludeEndpoint()
+  async googleAuthCallback(
+    @Req() req: Request,
+    @Res() res: Response,
+    @Ip() ip: string,
+    @Headers('user-agent') userAgent: string,
+  ) {
+    try {
+      const user = req.user as { id: string; email: string; name: string | null }
+      const tokens = await this.authService.googleLogin(user, userAgent, ip)
+      this.setAuthCookies(res, tokens)
+      res.redirect(`${googleOAuthConstants.frontendUrl}/dashboard`)
+    } catch {
+      res.redirect(`${googleOAuthConstants.frontendUrl}/login?error=oauth`)
+    }
+  }
+
+  private setAuthCookies(
+    res: Response,
+    tokens: { accessToken: string; refreshToken: string },
+  ) {
+    res.cookie('access_token', tokens.accessToken, {
+      httpOnly: true,
+      sameSite: 'lax',
+      maxAge: ACCESS_TOKEN_MAX_AGE,
+    })
+    res.cookie('refresh_token', tokens.refreshToken, {
+      httpOnly: true,
+      sameSite: 'lax',
+      maxAge: REFRESH_TOKEN_MAX_AGE,
+    })
   }
 }

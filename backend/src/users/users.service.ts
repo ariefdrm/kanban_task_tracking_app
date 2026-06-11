@@ -44,6 +44,13 @@ export class UsersService {
     })
     if (!user) throw new NotFoundException('User not found')
 
+    // Google-only accounts have no password to verify against.
+    if (!user.password) {
+      throw new BadRequestException(
+        'This account uses Google sign-in and has no password to change.',
+      )
+    }
+
     const valid = await bcrypt.compare(dto.currentPassword, user.password)
     if (!valid) throw new UnauthorizedException('Current password is incorrect')
 

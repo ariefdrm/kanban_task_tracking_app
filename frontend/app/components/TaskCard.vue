@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { CalendarDays, Flag, AlignLeft, GripVertical } from 'lucide-vue-next'
+import { CalendarDays, Flag, AlignLeft, GripVertical, TrendingUp } from 'lucide-vue-next'
 import type { Task, TaskPriority } from '~/types/api'
 import { formatShortDate } from '~/utils/format'
 
@@ -18,6 +18,13 @@ const priorityLabel: Record<TaskPriority, string> = {
   MEDIUM: 'Med',
   LOW: 'Low',
 }
+
+const PRIORITY_RANK: Record<TaskPriority, number> = { LOW: 0, MEDIUM: 1, HIGH: 2 }
+
+// True when the deadline-escalation job raised priority above what the user set.
+const autoEscalated = computed(
+  () => PRIORITY_RANK[props.task.priority] > PRIORITY_RANK[props.task.basePriority],
+)
 
 const due = computed(() => formatShortDate(props.task.dueDate))
 
@@ -63,9 +70,16 @@ const overdue = computed(() => {
               'inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide',
               priorityTone[task.priority],
             ]"
+            :title="
+              autoEscalated
+                ? `Auto-raised to ${priorityLabel[task.priority]} — deadline approaching`
+                : undefined
+            "
           >
-            <Flag class="h-2.5 w-2.5" />
+            <TrendingUp v-if="autoEscalated" class="h-2.5 w-2.5" />
+            <Flag v-else class="h-2.5 w-2.5" />
             {{ priorityLabel[task.priority] }}
+            <span v-if="autoEscalated" class="font-semibold normal-case opacity-70">· auto</span>
           </span>
 
           <span

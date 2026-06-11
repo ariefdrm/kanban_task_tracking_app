@@ -4,6 +4,7 @@ import { ActivitiesService } from '../activities/activities.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { MoveTaskDto } from './dto/move-task.dto';
+import { escalatePriority } from './priority-escalation';
 
 @Injectable()
 export class TaskService {
@@ -15,6 +16,9 @@ export class TaskService {
   async create(userId: string, dto: CreateTaskDto) {
     const column = await this.loadOwnedColumn(userId, dto.columnId)
 
+    const basePriority = dto.priority ?? 'MEDIUM'
+    const dueDate = dto.dueDate ? new Date(dto.dueDate) : null
+
     const task = await this.prisma.$transaction(async (tx) => {
       const count = await tx.task.count({ where: { columnId: column.id } })
       return tx.task.create({
@@ -22,8 +26,11 @@ export class TaskService {
           columnId: column.id,
           title: dto.title,
           description: dto.description,
-          priority: dto.priority ?? 'MEDIUM',
-          dueDate: dto.dueDate ? new Date(dto.dueDate) : null,
+          basePriority,
+          // Apply deadline escalation up-front so a task created close to its
+          // due date is already HIGH without waiting for the hourly job.
+          priority: escalatePriority(basePriority, dueDate),
+          dueDate,
           position: count,
         },
       })
@@ -50,8 +57,22 @@ export class TaskService {
     const data: Record<string, unknown> = {}
     if (dto.title !== undefined) data.title = dto.title
     if (dto.description !== undefined) data.description = dto.description
-    if (dto.priority !== undefined) data.priority = dto.priority
-    if (dto.dueDate !== undefined) data.dueDate = dto.dueDate ? new Date(dto.dueDate) : null
+
+    // When the user edits priority or due date, recompute the effective
+    // priority so escalation reflects the new manual baseline / deadline
+    // immediately. A manual priority change resets the baseline.
+    if (dto.priority !== undefined || dto.dueDate !== undefined) {
+      const basePriority = dto.priority ?? task.basePriority
+      const dueDate =
+        dto.dueDate !== undefined
+          ? dto.dueDate
+            ? new Date(dto.dueDate)
+            : null
+          : task.dueDate
+      if (dto.priority !== undefined) data.basePriority = basePriority
+      if (dto.dueDate !== undefined) data.dueDate = dueDate
+      data.priority = escalatePriority(basePriority, dueDate)
+    }
 
     const updated = await this.prisma.task.update({
       where: { id: taskId },

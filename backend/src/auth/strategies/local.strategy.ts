@@ -14,6 +14,9 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
     const user = await this.prismaService.user.findUnique({ where: { email } })
     if (!user) throw new UnauthorizedException('Invalid credentials')
 
+    // OAuth-only accounts (Google) have no local password.
+    if (!user.password) throw new UnauthorizedException('Invalid credentials')
+
     const valid = await bcrypt.compare(password, user.password)
     if (!valid) throw new UnauthorizedException('Invalid credentials')
 

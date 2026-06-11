@@ -61,6 +61,11 @@ export class AuthService {
     const user = await this.prisma.user.findUnique({ where: { email: dto.email } })
     if (!user) throw new ConflictException("Email Not Found")
 
+    // OAuth-only accounts have no local password to compare against.
+    if (!user.password) {
+      throw new UnauthorizedException('This account uses Google sign-in. Continue with Google.')
+    }
+
     const valid = await bcrypt.compare(dto.password as string, user.password)
     if (!valid) throw new UnauthorizedException("Invalid Credentials")
 
@@ -75,6 +80,52 @@ export class AuthService {
     return {
       ...tokens
     }
+  }
+
+  /**
+   * Resolves a local user for a verified Google profile. Links to an existing
+   * account by email (Google has already verified ownership), otherwise creates
+   * a new password-less account.
+   */
+  async validateGoogleUser(profile: {
+    googleId: string
+    email: string
+    name: string | null
+    avatarUrl: string | null
+  }) {
+    const byGoogleId = await this.prisma.user.findUnique({ where: { googleId: profile.googleId } })
+    if (byGoogleId) return byGoogleId
+
+    const byEmail = await this.prisma.user.findUnique({ where: { email: profile.email } })
+    if (byEmail) {
+      return this.prisma.user.update({
+        where: { id: byEmail.id },
+        data: {
+          googleId: profile.googleId,
+          avatarUrl: byEmail.avatarUrl ?? profile.avatarUrl,
+          name: byEmail.name ?? profile.name,
+        },
+      })
+    }
+
+    return this.prisma.user.create({
+      data: {
+        email: profile.email,
+        name: profile.name,
+        provider: 'google',
+        googleId: profile.googleId,
+        avatarUrl: profile.avatarUrl,
+      },
+    })
+  }
+
+  /** Issues a token pair for an already-authenticated user (e.g. via Google). */
+  async googleLogin(
+    user: { id: string; email: string; name: string | null },
+    userAgent: string,
+    ip: string,
+  ) {
+    return this.generateTokens(user.id, user.email, user.name, userAgent, ip)
   }
 
   async refresh(refreshToken: string, userAgent: string, ip: string) {
