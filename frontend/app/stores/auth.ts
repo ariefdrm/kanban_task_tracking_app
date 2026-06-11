@@ -45,12 +45,14 @@ export const useAuthStore = defineStore('auth', {
     async login(email: string, password: string) {
       const api = useApi()
       await api.post('/auth/login', { email, password })
+      this.resetUserData()
       await this.fetchMe()
     },
 
     async register(name: string, email: string, password: string) {
       const api = useApi()
       await api.post('/auth/register', { name, email, password })
+      this.resetUserData()
       await this.fetchMe()
     },
 
@@ -95,6 +97,19 @@ export const useAuthStore = defineStore('auth', {
       this.user = null
       this.ready = true
       clearLegacyStorage()
+      this.resetUserData()
+    },
+
+    // Reset per-user data stores so one account's boards/analytics/activities
+    // never leak into another when accounts are switched client-side (no full
+    // page reload). The boards store caches with a `loaded` guard, so without
+    // this it would keep serving the previous user's (or empty) list.
+    resetUserData() {
+      if (!import.meta.client) return
+      useBoardsStore().$reset()
+      useBoardStore().$reset()
+      useAnalyticsStore().$reset()
+      useActivitiesStore().$reset()
     },
   },
 })
