@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { LayoutDashboard, KanbanSquare, BarChart3, History, UserCircle2 } from 'lucide-vue-next'
+import { LayoutDashboard, KanbanSquare, BarChart3, History, UserCircle2, ChevronsLeft, ChevronsRight } from 'lucide-vue-next'
 
-const { open, close } = useSidebar()
+const { open, collapsed, close, toggleCollapse } = useSidebar()
 
 const links = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -10,6 +10,13 @@ const links = [
   { to: '/activities', label: 'Activities', icon: History },
   { to: '/profile', label: 'Profile', icon: UserCircle2 },
 ]
+
+function handleLogoClick() {
+  // Collapse toggle only applies on desktop — mobile uses the overlay/backdrop pattern
+  if (import.meta.client && window.innerWidth >= 1024) {
+    toggleCollapse()
+  }
+}
 </script>
 
 <template>
@@ -29,38 +36,69 @@ const links = [
 
   <aside
     :class="[
-      'fixed inset-y-0 left-0 z-40 w-64 bg-surface border-r border-border flex flex-col transition-transform duration-200',
+      'fixed inset-y-0 left-0 z-40 bg-surface border-r border-border flex flex-col overflow-hidden',
       'dark:bg-surface-dark dark:border-border-dark',
+      'w-64 transition-[width,transform] duration-200 ease-out-expo',
+      collapsed && 'lg:w-14',
       open ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
     ]"
     aria-label="Primary navigation"
   >
-    <div class="h-16 flex items-center px-6 border-b border-border dark:border-border-dark">
-      <AppLogo />
+    <!-- Logo header — hover cross-fades to collapse toggle on desktop -->
+    <div
+      :class="[
+        'group relative h-16 flex items-center border-b border-border dark:border-border-dark shrink-0 select-none',
+        'lg:cursor-pointer',
+        collapsed ? 'lg:justify-center lg:px-0 px-6' : 'px-6',
+      ]"
+      :title="collapsed ? 'Expand sidebar' : 'Collapse sidebar'"
+      @click="handleLogoClick"
+    >
+      <!-- Logo: visible by default, fades out on desktop hover -->
+      <AppLogo
+        to="/"
+        :show-text="!collapsed"
+        class="shrink-0 transition-opacity duration-150 lg:group-hover:opacity-0 pointer-events-none"
+      />
+
+      <!-- Collapse/expand icon: appears on desktop hover -->
+      <div
+        class="hidden lg:flex absolute inset-0 items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none"
+      >
+        <span class="flex h-9 w-9 items-center justify-center rounded-button bg-canvas/80 dark:bg-canvas-dark/80 text-ink dark:text-ink-dark">
+          <ChevronsLeft v-if="!collapsed" class="h-4 w-4" />
+          <ChevronsRight v-else class="h-4 w-4" />
+        </span>
+      </div>
     </div>
 
-    <div class="px-6 pt-5 pb-2">
-      <p class="eyebrow">Workspace</p>
-    </div>
-    <nav class="flex-1 px-3 pb-4 space-y-0.5 overflow-y-auto scrollbar-thin">
+    <!-- Nav -->
+    <nav
+      :class="[
+        'flex-1 pt-3 pb-4 space-y-0.5 overflow-y-auto scrollbar-thin',
+        collapsed ? 'lg:px-1.5 px-3' : 'px-3',
+      ]"
+    >
       <NuxtLink
         v-for="link in links"
         :key="link.to"
         :to="link.to"
+        :title="collapsed ? link.label : undefined"
         active-class="!text-ink dark:!text-ink-dark bg-accent-soft/60 dark:bg-accent-softDark"
-        class="group relative flex items-center gap-3 rounded-button px-3 h-10 text-sm font-medium text-ink-muted hover:text-ink dark:hover:text-ink-dark transition-colors duration-200 ease-out-expo"
+        :class="[
+          'group relative flex items-center gap-3 rounded-button h-10 text-sm font-medium',
+          'text-ink-muted hover:text-ink dark:hover:text-ink-dark',
+          'transition-colors duration-200 ease-out-expo',
+          collapsed ? 'lg:justify-center lg:px-0 px-3' : 'px-3',
+        ]"
         @click="close"
       >
-        <component :is="link.icon" class="h-4 w-4 flex-shrink-0 transition-transform duration-300 ease-out-expo group-hover:scale-110" />
-        <span>{{ link.label }}</span>
+        <component
+          :is="link.icon"
+          class="h-4 w-4 flex-shrink-0 transition-transform duration-300 ease-out-expo group-hover:scale-110"
+        />
+        <span :class="{ 'lg:hidden': collapsed }">{{ link.label }}</span>
       </NuxtLink>
     </nav>
-
-    <div class="px-6 py-5 border-t border-border dark:border-border-dark">
-      <p class="font-display italic text-sm text-ink dark:text-ink-dark leading-snug">
-        Stay focused.<br>Ship more.
-      </p>
-      <p class="mt-2 eyebrow">TaskFlow · MVP 1.0</p>
-    </div>
   </aside>
 </template>

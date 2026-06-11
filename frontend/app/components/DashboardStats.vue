@@ -32,7 +32,7 @@ const stats = computed(() => {
         :value="stats.totalBoards"
         :icon="KanbanSquare"
         tone="accent"
-        :loading="analytics.loadingSummary && !analytics.summary"
+        :loading="!analytics.summary"
       />
       <StatCard
         label="Total tasks"
@@ -40,7 +40,7 @@ const stats = computed(() => {
         description="Across every board"
         :icon="ListTodo"
         tone="neutral"
-        :loading="analytics.loadingSummary && !analytics.summary"
+        :loading="!analytics.summary"
       />
       <StatCard
         label="Completed"
@@ -48,7 +48,7 @@ const stats = computed(() => {
         :description="`${stats.pending} still pending`"
         :icon="CheckCircle2"
         tone="success"
-        :loading="analytics.loadingSummary && !analytics.summary"
+        :loading="!analytics.summary"
       />
       <StatCard
         label="Completion rate"
@@ -56,7 +56,7 @@ const stats = computed(() => {
         description="Share of tasks in Done columns"
         :icon="TrendingUp"
         tone="warning"
-        :loading="analytics.loadingSummary && !analytics.summary"
+        :loading="!analytics.summary"
       />
     </div>
   </section>

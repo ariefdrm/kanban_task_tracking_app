@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
-type Size = 'sm' | 'md' | 'lg'
+type Size = 'sm' | 'md' | 'lg' | 'xl'
 
 const props = withDefaults(
   defineProps<{
@@ -18,6 +18,7 @@ const sizes: Record<Size, string> = {
   sm: 'h-7 w-7 text-[11px]',
   md: 'h-9 w-9 text-sm',
   lg: 'h-12 w-12 text-base',
+  xl: 'h-16 w-16 text-xl',
 }
 
 const initials = computed(() => {

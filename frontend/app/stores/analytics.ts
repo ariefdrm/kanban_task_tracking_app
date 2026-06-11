@@ -18,9 +18,9 @@ export const useAnalyticsStore = defineStore('analytics', {
     trend: [],
     distribution: [],
     trendDays: 14,
-    loadingSummary: false,
-    loadingTrend: false,
-    loadingDistribution: false,
+    loadingSummary: true,
+    loadingTrend: true,
+    loadingDistribution: true,
     error: null,
   }),
 

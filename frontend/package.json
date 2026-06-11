@@ -20,6 +20,7 @@
     "eslint": "^10.3.0",
     "lucide-vue-next": "^0.460.0",
     "nuxt": "^4.4.4",
+    "openapi-fetch": "^0.17.0",
     "pinia": "^3.0.4",
     "vue": "^3.5.33",
     "vue-chartjs": "^5.3.2",
@@ -27,6 +28,7 @@
     "vue-router": "^5.0.6"
   },
   "devDependencies": {
-    "@types/node": "^25.9.1"
+    "@types/node": "^25.9.1",
+    "openapi-typescript": "^7.13.0"
   }
 }

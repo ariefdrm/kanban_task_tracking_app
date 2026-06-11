@@ -10,6 +10,9 @@ export default defineNuxtConfig({
   // the client avoids the bounce-through-/login flash and hydration mismatches
   // around time-of-day greetings, color mode, and authenticated user data.
   ssr: false,
+  routeRules: {
+    '/': { ssr: true }
+  },
 
   modules: [
     '@nuxtjs/tailwindcss',
